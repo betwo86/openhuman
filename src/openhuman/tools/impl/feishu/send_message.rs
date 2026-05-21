@@ -91,7 +91,7 @@ impl Tool for FeishuSendMessageTool {
             let message_id = resp_body["data"]["message_id"]
                 .as_str()
                 .unwrap_or("unknown");
-            Ok(ToolResult::text(format!(
+            Ok(ToolResult::success(format!(
                 "Message sent successfully. message_id: {}",
                 message_id
             )))

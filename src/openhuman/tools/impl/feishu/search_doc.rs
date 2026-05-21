@@ -101,7 +101,7 @@ impl FeishuSearchDocTool {
             .unwrap_or_default();
 
         if items.is_empty() {
-            return Ok(ToolResult::text(format!(
+            return Ok(ToolResult::success(format!(
                 "No documents found for: {}",
                 query
             )));
@@ -115,7 +115,7 @@ impl FeishuSearchDocTool {
             results.push(format!("- [{}]({}) token: {}", title, url, token));
         }
 
-        Ok(ToolResult::text(format!(
+        Ok(ToolResult::success(format!(
             "Found {} documents for '{}':\n{}",
             items.len(),
             query,
@@ -146,7 +146,7 @@ impl FeishuSearchDocTool {
             .as_str()
             .unwrap_or("(empty document)");
 
-        Ok(ToolResult::text(format!("Document content:\n\n{}", content)))
+        Ok(ToolResult::success(format!("Document content:\n\n{}", content)))
     }
 }
 

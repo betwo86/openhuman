@@ -109,7 +109,7 @@ impl FeishuCalendarTool {
             .unwrap_or_default();
 
         if items.is_empty() {
-            return Ok(ToolResult::text("No calendars found."));
+            return Ok(ToolResult::success("No calendars found."));
         }
 
         let mut results = Vec::new();
@@ -120,7 +120,7 @@ impl FeishuCalendarTool {
             results.push(format!("- {} (id: {}, role: {})", title, id, role));
         }
 
-        Ok(ToolResult::text(format!(
+        Ok(ToolResult::success(format!(
             "Found {} calendars:\n{}",
             items.len(),
             results.join("\n")
@@ -159,7 +159,7 @@ impl FeishuCalendarTool {
             .unwrap_or_default();
 
         if items.is_empty() {
-            return Ok(ToolResult::text("No events found."));
+            return Ok(ToolResult::success("No events found."));
         }
 
         let mut results = Vec::new();
@@ -175,7 +175,7 @@ impl FeishuCalendarTool {
             ));
         }
 
-        Ok(ToolResult::text(format!(
+        Ok(ToolResult::success(format!(
             "Found {} events:\n{}",
             items.len(),
             results.join("\n")
@@ -220,7 +220,7 @@ impl FeishuCalendarTool {
             let event_id = resp_body["data"]["event_id"]
                 .as_str()
                 .unwrap_or("unknown");
-            Ok(ToolResult::text(format!(
+            Ok(ToolResult::success(format!(
                 "Event created successfully. event_id: {}",
                 event_id
             )))
