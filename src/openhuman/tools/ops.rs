@@ -562,6 +562,28 @@ pub fn all_tools_with_runtime(
         tracing::debug!("[integrations] polymarket disabled — skipping");
     }
 
+    // Feishu/Lark tools — register when LarkConfig is present and enabled.
+    if let Some(lark) = &root_config.channels_config.lark {
+        if !lark.app_id.is_empty() && !lark.app_secret.is_empty() {
+            let client = feishu::FeishuClient::new(lark.app_id.clone(), lark.app_secret.clone());
+            tools.push(Box::new(feishu::SendMessageTool::new(client.clone())));
+            tools.push(Box::new(feishu::SearchDocTool::new(client.clone())));
+            tools.push(Box::new(feishu::CalendarListTool::new(client.clone())));
+            tools.push(Box::new(feishu::CalendarQueryEventsTool::new(client.clone())));
+            tools.push(Box::new(feishu::CalendarCreateEventTool::new(client.clone())));
+            tracing::debug!(
+                "[integrations] registered feishu/lark tools (app_id = {})",
+                lark.app_id
+            );
+        } else {
+            tracing::debug!(
+                "[integrations] feishu/lark config present but app_id or app_secret empty — skipping"
+            );
+        }
+    } else {
+        tracing::debug!("[integrations] feishu/lark not configured — skipping");
+    }
+
     // Coding-harness `lsp` tool (issue #1205) — capability-gated by the
     // OPENHUMAN_LSP_ENABLED env var. The backend (real language-server
     // bridge) is a follow-up; today the gate just controls visibility

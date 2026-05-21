@@ -175,6 +175,11 @@ fn legacy_label_for(type_str: &str) -> &'static str {
         "anthropic" => "Anthropic",
         "openrouter" => "OpenRouter",
         "orcarouter" => "OrcaRouter",
+        "deepseek" => "DeepSeek",
+        "siliconflow" => "SiliconFlow",
+        "qwen" => "通义千问",
+        "moonshot" => "Moonshot",
+        "zhipu" => "智谱 GLM",
         "custom" => "Custom",
         _ => "Custom",
     }
@@ -188,6 +193,11 @@ fn legacy_default_endpoint(type_str: &str) -> &'static str {
         "anthropic" => "https://api.anthropic.com/v1",
         "openrouter" => "https://openrouter.ai/api/v1",
         "orcarouter" => "https://api.orcarouter.ai/v1",
+        "deepseek" => "https://api.deepseek.com/v1",
+        "siliconflow" => "https://api.siliconflow.cn/v1",
+        "qwen" => "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "moonshot" => "https://api.moonshot.cn/v1",
+        "zhipu" => "https://open.bigmodel.cn/api/paas/v4",
         _ => "",
     }
 }

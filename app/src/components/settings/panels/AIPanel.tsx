@@ -116,6 +116,26 @@ const BUILTIN_PROVIDER_META: Record<string, { tone: string; label: string }> = {
     label: 'OrcaRouter',
     tone: 'bg-sky-50 dark:bg-sky-500/10 ring-sky-200 text-sky-900 dark:text-sky-100',
   },
+  deepseek: {
+    label: 'DeepSeek',
+    tone: 'bg-blue-50 dark:bg-blue-500/10 ring-blue-200 text-blue-900 dark:text-blue-100',
+  },
+  siliconflow: {
+    label: 'SiliconFlow',
+    tone: 'bg-purple-50 dark:bg-purple-500/10 ring-purple-200 text-purple-900 dark:text-purple-100',
+  },
+  qwen: {
+    label: '通义千问',
+    tone: 'bg-cyan-50 dark:bg-cyan-500/10 ring-cyan-200 text-cyan-900 dark:text-cyan-100',
+  },
+  moonshot: {
+    label: 'Moonshot',
+    tone: 'bg-violet-50 dark:bg-violet-500/10 ring-violet-200 text-violet-900 dark:text-violet-100',
+  },
+  zhipu: {
+    label: '智谱 GLM',
+    tone: 'bg-rose-50 dark:bg-rose-500/10 ring-rose-200 text-rose-900 dark:text-rose-100',
+  },
   custom: {
     label: 'Custom',
     tone: 'bg-stone-100 dark:bg-neutral-800 ring-stone-300 text-stone-900 dark:text-neutral-100',
@@ -2069,8 +2089,8 @@ const AIPanel = ({ embedded = false }: AIPanelProps = {}) => {
             )}
 
             <div className="flex flex-wrap gap-2">
-              {/* Built-in cloud providers — openai/anthropic/openrouter/orcarouter/custom */}
-              {(['openai', 'anthropic', 'openrouter', 'orcarouter', 'custom'] as const).map(
+              {/* Built-in cloud providers — openai/anthropic/openrouter/orcarouter/custom/chinese */}
+              {(['openai', 'anthropic', 'openrouter', 'orcarouter', 'deepseek', 'siliconflow', 'qwen', 'moonshot', 'zhipu', 'custom'] as const).map(
                 slug => {
                   const meta = BUILTIN_PROVIDER_META[slug];
                   const label = meta?.label ?? slug;
@@ -2564,7 +2584,7 @@ const CloudProviderEditor = ({
               }}
               disabled={!!initial}
               className="mt-1 w-full rounded-lg border border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-stone-900 dark:text-neutral-100 disabled:opacity-60 focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-200">
-              {(['openai', 'anthropic', 'openrouter', 'orcarouter', 'custom'] as const)
+              {(['openai', 'anthropic', 'openrouter', 'orcarouter', 'deepseek', 'siliconflow', 'qwen', 'moonshot', 'zhipu', 'custom'] as const)
                 .filter(s => s === slug || !existingSlugs.includes(s))
                 .map(s => (
                   <option key={s} value={s}>
@@ -2681,6 +2701,16 @@ function defaultEndpointFor(slug: string): string {
       return 'https://openrouter.ai/api/v1';
     case 'orcarouter':
       return 'https://api.orcarouter.ai/v1';
+    case 'deepseek':
+      return 'https://api.deepseek.com/v1';
+    case 'siliconflow':
+      return 'https://api.siliconflow.cn/v1';
+    case 'qwen':
+      return 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+    case 'moonshot':
+      return 'https://api.moonshot.cn/v1';
+    case 'zhipu':
+      return 'https://open.bigmodel.cn/api/paas/v4';
     case 'ollama':
       // Ollama exposes an OpenAI-compatible endpoint at /v1; the bare host is
       // also accepted by the Rust factory (it appends /v1 internally for chat).
