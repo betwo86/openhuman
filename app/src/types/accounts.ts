@@ -79,7 +79,7 @@ const BASE_PROVIDERS: ProviderDescriptor[] = [
     id: 'wechat',
     label: 'WeChat Web',
     description: 'Open WeChat in-app for QR sign-in and desktop chat access.',
-    serviceUrl: 'https://web.wechat.com/',
+    serviceUrl: 'https://wx.qq.com/',
   },
   {
     id: 'telegram',

@@ -49,7 +49,7 @@ const GOOGLE_MEET_RECIPE_JS: &str = include_str!("../../recipes/google-meet/reci
 fn provider_url(provider: &str) -> Option<&'static str> {
     match provider {
         "whatsapp" => Some("https://web.whatsapp.com/"),
-        "wechat" => Some("https://web.wechat.com/"),
+        "wechat" => Some("https://wx.qq.com/"),
         "telegram" => Some("https://web.telegram.org/k/"),
         "linkedin" => Some("https://www.linkedin.com/messaging/"),
         "slack" => Some("https://app.slack.com/client/"),
@@ -3381,7 +3381,7 @@ mod tests {
 
     #[test]
     fn wechat_registered_in_provider_url() {
-        assert_eq!(provider_url("wechat"), Some("https://web.wechat.com/"));
+        assert_eq!(provider_url("wechat"), Some("https://wx.qq.com/"));
     }
 
     #[test]
