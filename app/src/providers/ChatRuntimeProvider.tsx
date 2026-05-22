@@ -165,6 +165,7 @@ const ChatRuntimeProvider = ({ children }: { children: React.ReactNode }) => {
   const toolTimelineRef = useRef(toolTimelineByThread);
   const inferenceStatusRef = useRef(inferenceStatusByThread);
   const streamingAssistantRef = useRef(streamingAssistantByThread);
+  const completedTurnsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     toolTimelineRef.current = toolTimelineByThread;
@@ -590,6 +591,8 @@ const ChatRuntimeProvider = ({ children }: { children: React.ReactNode }) => {
         dispatch(setToolTimelineForThread({ threadId: event.thread_id, entries: next }));
       },
       onSegment: (event: ChatSegmentEvent) => {
+        const turnKey = `${event.thread_id}:${event.request_id}`;
+        if (completedTurnsRef.current.has(turnKey)) return;
         const eventKey = `segment:${event.thread_id}:${event.request_id}:${event.segment_index}`;
         if (
           !markChatEventSeen(eventKey, { threadId: event.thread_id, requestId: event.request_id })
@@ -608,6 +611,8 @@ const ChatRuntimeProvider = ({ children }: { children: React.ReactNode }) => {
         );
       },
       onTextDelta: event => {
+        const turnKey = `${event.thread_id}:${event.request_id}`;
+        if (completedTurnsRef.current.has(turnKey)) return;
         const cr = store.getState().chatRuntime;
         const existing = cr.streamingAssistantByThread[event.thread_id];
         let streaming: StreamingAssistantState;
@@ -623,6 +628,8 @@ const ChatRuntimeProvider = ({ children }: { children: React.ReactNode }) => {
         dispatch(setStreamingAssistantForThread({ threadId: event.thread_id, streaming }));
       },
       onThinkingDelta: event => {
+        const turnKey = `${event.thread_id}:${event.request_id}`;
+        if (completedTurnsRef.current.has(turnKey)) return;
         const cr = store.getState().chatRuntime;
         const existing = cr.streamingAssistantByThread[event.thread_id];
         let streaming: StreamingAssistantState;
@@ -638,6 +645,8 @@ const ChatRuntimeProvider = ({ children }: { children: React.ReactNode }) => {
         dispatch(setStreamingAssistantForThread({ threadId: event.thread_id, streaming }));
       },
       onToolArgsDelta: event => {
+        const turnKey = `${event.thread_id}:${event.request_id}`;
+        if (completedTurnsRef.current.has(turnKey)) return;
         const cr = store.getState().chatRuntime;
         const existing = cr.toolTimelineByThread[event.thread_id] ?? [];
         let matchIdx = -1;
@@ -717,6 +726,9 @@ const ChatRuntimeProvider = ({ children }: { children: React.ReactNode }) => {
           !markChatEventSeen(eventKey, { threadId: event.thread_id, requestId: event.request_id })
         )
           return;
+
+        const turnKey = `${event.thread_id}:${event.request_id}`;
+        completedTurnsRef.current.add(turnKey);
 
         rtLog('chat_done', {
           thread: event.thread_id,
@@ -915,6 +927,7 @@ const ChatRuntimeProvider = ({ children }: { children: React.ReactNode }) => {
     if (activeThreadId) {
       dispatch(setActiveThread(null));
     }
+    completedTurnsRef.current.clear();
   }, [socketStatus, dispatch]);
 
   return <>{children}</>;
