@@ -16,10 +16,6 @@ use super::web::publish_web_channel_event;
 
 const MIN_SEGMENT_CHARS: usize = 40;
 const MAX_SEGMENTS: usize = 5;
-/// Max time to wait for the local model to decide on a reaction emoji.
-/// If the local model is busy, we skip the reaction rather than
-/// holding up chat_done delivery.
-const REACTION_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(5);
 
 /// Deliver an agent response to the frontend, applying local-model
 /// presentation (segmentation + reaction) when the model is available.
@@ -35,21 +31,20 @@ pub async fn deliver_response(
     user_message: &str,
     citations: &[crate::openhuman::agent::memory_loader::MemoryCitation],
 ) {
-    // Spawn reaction decision in parallel — it runs on the local model and
-    // shouldn't block segmentation or delivery.
-    let user_msg_owned = user_message.to_string();
-    let reaction_handle = tokio::spawn(async move { try_reaction(&user_msg_owned).await });
-
     // Segmentation is pure CPU work, runs immediately.
     let segments = segment_for_delivery(full_response);
 
-    // Await the reaction result with a timeout so chat_done is never
-    // blocked by a busy local model.
-    let reaction_emoji = tokio::time::timeout(REACTION_TIMEOUT, reaction_handle)
-        .await
-        .ok()
-        .and_then(|r| r.ok())
-        .flatten();
+    // Emoji reaction runs on the local model via a spawned task.
+    // Fire-and-forget: we never block chat_done on it.
+    let reaction_emoji = None;
+    {
+        let user_msg_owned = user_message.to_string();
+        tokio::spawn(async move {
+            if let Some(emoji) = try_reaction(&user_msg_owned).await {
+                tracing::debug!(emoji, "[presentation] reaction decided");
+            }
+        });
+    }
 
     if segments.len() <= 1 {
         // Single bubble — emit chat_done directly.
