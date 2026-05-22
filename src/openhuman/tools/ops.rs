@@ -565,10 +565,10 @@ pub fn all_tools_with_runtime(
     // Feishu/Lark tools — register when LarkConfig is present and enabled.
     if let Some(lark) = &root_config.channels_config.lark {
         if !lark.app_id.is_empty() && !lark.app_secret.is_empty() {
-            let client = feishu::FeishuClient::new(lark.app_id.clone(), lark.app_secret.clone(), true);
-            tools.push(Box::new(feishu::FeishuSendMessageTool::new(Some(client.clone()))));
-            tools.push(Box::new(feishu::FeishuSearchDocTool::new(Some(client.clone()))));
-            tools.push(Box::new(feishu::FeishuCalendarTool::new(Some(client))));
+            let client = FeishuClient::new(lark.app_id.clone(), lark.app_secret.clone(), true);
+            tools.push(Box::new(FeishuSendMessageTool::new(Some(client.clone()))));
+            tools.push(Box::new(FeishuSearchDocTool::new(Some(client.clone()))));
+            tools.push(Box::new(FeishuCalendarTool::new(Some(client))));
             tracing::debug!(
                 "[integrations] registered feishu/lark tools (app_id = {})",
                 lark.app_id
