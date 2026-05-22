@@ -452,8 +452,22 @@ pub async fn start_chat(
         )
         .await;
 
+        log::info!(
+            "[web_channel] run_chat_task returned client={} thread={} request={}",
+            client_id_task,
+            thread_id_task,
+            request_id_task,
+        );
+
         match result {
             Ok(chat_result) => {
+                log::info!(
+                    "[web_channel] run_chat_task OK — calling deliver_response client={} thread={} request={} resp_len={}",
+                    client_id_task,
+                    thread_id_task,
+                    request_id_task,
+                    chat_result.full_response.len(),
+                );
                 // ── Presentation layer (local model, fire-and-forget) ─────
                 // Segment the response into human-readable bubbles and
                 // decide whether to react — both run via local Ollama if
@@ -467,6 +481,13 @@ pub async fn start_chat(
                     &chat_result.citations,
                 )
                 .await;
+
+                log::info!(
+                    "[web_channel] deliver_response completed client={} thread={} request={}",
+                    client_id_task,
+                    thread_id_task,
+                    request_id_task,
+                );
             }
             Err(err) => {
                 log::warn!(

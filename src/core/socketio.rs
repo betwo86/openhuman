@@ -569,6 +569,15 @@ fn join_room_logged(socket: &SocketRef, room: &str, client_id: &str) {
 }
 
 fn emit_web_channel_event(io: &SocketIo, event: WebChannelEvent) {
+    if event.event == "chat_done" || event.event == "chat_error" {
+        log::info!(
+            "[socketio] >>> emitting {} room={} thread={} request={}",
+            event.event,
+            event.client_id,
+            event.thread_id,
+            event.request_id,
+        );
+    }
     let room = event.client_id.clone();
     let name = event.event.clone();
     if let Ok(payload) = serde_json::to_value(event) {

@@ -31,8 +31,23 @@ pub async fn deliver_response(
     user_message: &str,
     citations: &[crate::openhuman::agent::memory_loader::MemoryCitation],
 ) {
+    tracing::info!(
+        "[presentation] deliver_response entered client={} thread={} request={} resp_len={}",
+        client_id,
+        thread_id,
+        request_id,
+        full_response.len()
+    );
+
     // Segmentation is pure CPU work, runs immediately.
     let segments = segment_for_delivery(full_response);
+    tracing::info!(
+        "[presentation] segmentation done segments={} client={} thread={} request={}",
+        segments.len(),
+        client_id,
+        thread_id,
+        request_id,
+    );
 
     // Emoji reaction runs on the local model via a spawned task.
     // Fire-and-forget: we never block chat_done on it.
@@ -47,6 +62,12 @@ pub async fn deliver_response(
     }
 
     if segments.len() <= 1 {
+        tracing::info!(
+            "[presentation] emitting chat_done (single) client={} thread={} request={}",
+            client_id,
+            thread_id,
+            request_id,
+        );
         // Single bubble — emit chat_done directly.
         publish_web_channel_event(WebChannelEvent {
             event: "chat_done".to_string(),
@@ -76,6 +97,12 @@ pub async fn deliver_response(
                 Some(serde_json::json!(citations))
             },
         });
+        tracing::info!(
+            "[presentation] chat_done published (single) client={} thread={} request={}",
+            client_id,
+            thread_id,
+            request_id,
+        );
         return;
     }
 
