@@ -16,6 +16,10 @@ use super::web::publish_web_channel_event;
 
 const MIN_SEGMENT_CHARS: usize = 40;
 const MAX_SEGMENTS: usize = 5;
+/// Max time to wait for the local model to decide on a reaction emoji.
+/// If the local model is busy, we skip the reaction rather than
+/// holding up chat_done delivery.
+const REACTION_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(5);
 
 /// Deliver an agent response to the frontend, applying local-model
 /// presentation (segmentation + reaction) when the model is available.
@@ -39,8 +43,13 @@ pub async fn deliver_response(
     // Segmentation is pure CPU work, runs immediately.
     let segments = segment_for_delivery(full_response);
 
-    // Await the reaction result (should already be done or nearly done).
-    let reaction_emoji = reaction_handle.await.unwrap_or(None);
+    // Await the reaction result with a timeout so chat_done is never
+    // blocked by a busy local model.
+    let reaction_emoji = tokio::time::timeout(REACTION_TIMEOUT, reaction_handle)
+        .await
+        .ok()
+        .and_then(|r| r.ok())
+        .flatten();
 
     if segments.len() <= 1 {
         // Single bubble — emit chat_done directly.
