@@ -1,6 +1,8 @@
 import type { ChannelDefinition, ChannelType } from '../../types/channels';
 import ChannelCapabilities from './ChannelCapabilities';
+import DingTalkConfig from './DingTalkConfig';
 import DiscordConfig from './DiscordConfig';
+import LarkConfig from './LarkConfig';
 import TelegramConfig from './TelegramConfig';
 import WebChannelConfig from './WebChannelConfig';
 
@@ -26,6 +28,8 @@ const ChannelConfigPanel = ({ selectedChannel, definitions }: ChannelConfigPanel
         </div>
         {selectedChannel === 'telegram' && <TelegramConfig definition={definition} />}
         {selectedChannel === 'discord' && <DiscordConfig definition={definition} />}
+        {selectedChannel === 'lark' && <LarkConfig definition={definition} />}
+        {selectedChannel === 'dingtalk' && <DingTalkConfig definition={definition} />}
         {selectedChannel === 'web' && <WebChannelConfig definition={definition} />}
       </section>
 

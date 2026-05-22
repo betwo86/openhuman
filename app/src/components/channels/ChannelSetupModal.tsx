@@ -7,12 +7,16 @@ import { createPortal } from 'react-dom';
 
 import { useT } from '../../lib/i18n/I18nContext';
 import type { ChannelDefinition, ChannelType } from '../../types/channels';
+import DingTalkConfig from './DingTalkConfig';
 import DiscordConfig from './DiscordConfig';
+import LarkConfig from './LarkConfig';
 import TelegramConfig from './TelegramConfig';
 
 const CHANNEL_ICONS: Record<string, string> = {
   telegram: '\u2708\uFE0F',
   discord: '\uD83C\uDFAE',
+  lark: '\uD83D\uDC26',
+  dingtalk: '\uD83D\uDD14',
   web: '\uD83C\uDF10',
 };
 
@@ -29,6 +33,10 @@ function ChannelConfigContent({ definition }: { definition: ChannelDefinition })
       return <TelegramConfig definition={definition} />;
     case 'discord':
       return <DiscordConfig definition={definition} />;
+    case 'lark':
+      return <LarkConfig definition={definition} />;
+    case 'dingtalk':
+      return <DingTalkConfig definition={definition} />;
     default:
       return (
         <p className="text-sm text-stone-400 dark:text-neutral-500 py-4">
