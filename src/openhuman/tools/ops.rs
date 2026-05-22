@@ -74,13 +74,13 @@ pub fn all_tools_with_runtime(
 ) -> Vec<Box<dyn Tool>> {
     // Build a session-scoped managed Node.js bootstrap once, so ShellTool,
     // NodeExecTool, and NpmExecTool all share the same memoised resolution
-    // state. Disabled when `node.enabled = false` â€?in that case shell skips
+    // state. Disabled when `node.enabled = false` ï¿½?in that case shell skips
     // PATH injection and node/npm tools are not registered.
     let node_bootstrap: Option<Arc<NodeBootstrap>> = if root_config.node.enabled {
         tracing::debug!(
             version = %root_config.node.version,
             prefer_system = root_config.node.prefer_system,
-            "[tools::ops] node runtime enabled â€?constructing shared NodeBootstrap"
+            "[tools::ops] node runtime enabled ï¿½?constructing shared NodeBootstrap"
         );
         Some(Arc::new(NodeBootstrap::new(
             root_config.node.clone(),
@@ -89,7 +89,7 @@ pub fn all_tools_with_runtime(
         )))
     } else {
         tracing::debug!(
-            "[tools::ops] node runtime disabled â€?shell PATH injection + node_exec/npm_exec suppressed"
+            "[tools::ops] node runtime disabled ï¿½?shell PATH injection + node_exec/npm_exec suppressed"
         );
         None
     };
@@ -122,9 +122,9 @@ pub fn all_tools_with_runtime(
         Box::new(EditFileTool::new(security.clone())),
         Box::new(ApplyPatchTool::new(security.clone())),
         Box::new(CsvExportTool::new(security.clone())),
-        // Sub-agent dispatch â€?lets the parent agent delegate focused
-        // sub-tasks (research, code execution, API specialists, â€? by
-        // calling `spawn_subagent { agent_id, prompt, â€?}`. The runner
+        // Sub-agent dispatch ï¿½?lets the parent agent delegate focused
+        // sub-tasks (research, code execution, API specialists, ï¿½? by
+        // calling `spawn_subagent { agent_id, prompt, ï¿½?}`. The runner
         // builds a narrow Agent from an `AgentDefinition` lookup and
         // returns a single text result. See
         // `agent::harness::subagent_runner` for the dispatch path.
@@ -150,7 +150,7 @@ pub fn all_tools_with_runtime(
         Box::new(MemoryRecallTool::new(memory.clone())),
         Box::new(MemoryForgetTool::new(memory.clone(), security.clone())),
         Box::new(MemoryTreeTool),
-        // Explicit user-preference pinning â€?always registered so the model
+        // Explicit user-preference pinning ï¿½?always registered so the model
         // can save user-stated preferences regardless of whether the full
         // inference-based learning subsystem is enabled.  The preference
         // injection into the system prompt is controlled independently by
@@ -159,7 +159,7 @@ pub fn all_tools_with_runtime(
             memory.clone(),
             security.clone(),
         )),
-        // WhatsApp data store â€?read-only agent surface (issue #1341).
+        // WhatsApp data store ï¿½?read-only agent surface (issue #1341).
         // The matching `whatsapp_data_ingest` write-path stays internal-only
         // (registered in `src/core/all.rs::build_internal_only_controllers`)
         // and is intentionally NOT wrapped here.
@@ -217,7 +217,7 @@ pub fn all_tools_with_runtime(
         )));
     }
 
-    // HTTP request â€?always registered. `http_request.allowed_domains`
+    // HTTP request ï¿½?always registered. `http_request.allowed_domains`
     // + `security` still gate which hosts are reachable; there is no
     // enable flag because every session needs basic HTTP as a baseline
     // capability.
@@ -228,7 +228,7 @@ pub fn all_tools_with_runtime(
         http_config.timeout_secs,
     )));
 
-    // Coding-harness baseline `web_fetch` (issue #1205) â€?single-purpose
+    // Coding-harness baseline `web_fetch` (issue #1205) ï¿½?single-purpose
     // GET-and-read primitive that reuses the same allowed-domains gate
     // as `http_request`. Use this for docs/READMEs; reach for
     // `http_request` only when you need richer HTTP semantics.
@@ -239,7 +239,7 @@ pub fn all_tools_with_runtime(
         Some(http_config.timeout_secs),
     )));
 
-    // curl â€?always registered. Shares `http_request.allowed_domains`,
+    // curl ï¿½?always registered. Shares `http_request.allowed_domains`,
     // adds streaming-to-disk with a hard byte ceiling. Writes land
     // under `<workspace>/<curl.dest_subdir>`.
     tools.push(Box::new(CurlTool::new(
@@ -251,7 +251,7 @@ pub fn all_tools_with_runtime(
         root_config.curl.timeout_secs,
     )));
 
-    // Phase 3 STM recall â€?on-demand cross-thread episodic search tool.
+    // Phase 3 STM recall ï¿½?on-demand cross-thread episodic search tool.
     // Feature-gated on `learning.stm_recall_enabled` (default true) so the
     // tool surface and the preemptive prompt injection are enabled/disabled
     // together. `session_id` is not known at tool-build time; exclude-own-
@@ -267,7 +267,7 @@ pub fn all_tools_with_runtime(
         ));
     }
 
-    // gitbooks â€?answers questions about OpenHuman by calling the
+    // gitbooks ï¿½?answers questions about OpenHuman by calling the
     // GitBook MCP server. Two tools mirroring the upstream MCP tools.
     if root_config.gitbooks.enabled {
         tools.push(Box::new(GitbooksSearchTool::new(
@@ -298,10 +298,10 @@ pub fn all_tools_with_runtime(
             "[mcp_client] registered generic MCP bridge tools"
         );
     } else {
-        tracing::debug!("[mcp_client] no MCP servers registered â€?bridge tools skipped");
+        tracing::debug!("[mcp_client] no MCP servers registered ï¿½?bridge tools skipped");
     }
 
-    // Web search â€?always registered. Result/timeout budget
+    // Web search ï¿½?always registered. Result/timeout budget
     // knobs still come from `config.web_search`, but there is no
     // enable flag: every session needs research as a baseline
     // capability.
@@ -339,7 +339,7 @@ pub fn all_tools_with_runtime(
         .with_direct_search(direct_seltz_for_web_search),
     ));
 
-    // Seltz â€?direct-API web search, gated on `seltz.enabled` (auto-set
+    // Seltz ï¿½?direct-API web search, gated on `seltz.enabled` (auto-set
     // when `SELTZ_API_KEY` env var is present). Unlike the backend-proxied
     // web_search above, this calls the Seltz API directly with a user-
     // provided API key.
@@ -354,10 +354,10 @@ pub fn all_tools_with_runtime(
         ));
         tracing::debug!("[seltz] registered seltz_search tool");
     } else {
-        tracing::debug!("[seltz] disabled â€?set SELTZ_API_KEY to enable");
+        tracing::debug!("[seltz] disabled ï¿½?set SELTZ_API_KEY to enable");
     }
 
-    // SearXNG â€?self-hosted web search, gated on `searxng.enabled`.
+    // SearXNG ï¿½?self-hosted web search, gated on `searxng.enabled`.
     // This is useful for users who want current web results without routing
     // queries through OpenHuman's backend or a hosted search API.
     if root_config.searxng.enabled {
@@ -375,10 +375,10 @@ pub fn all_tools_with_runtime(
             "[searxng] registered searxng_search tool"
         );
     } else {
-        tracing::debug!("[searxng] disabled â€?set searxng.enabled=true to enable");
+        tracing::debug!("[searxng] disabled ï¿½?set searxng.enabled=true to enable");
     }
 
-    // Managed Node.js exec tools â€?gated on `root_config.node.enabled`.
+    // Managed Node.js exec tools ï¿½?gated on `root_config.node.enabled`.
     // Both share the same `NodeBootstrap` as ShellTool so the download +
     // extract + install pipeline runs at most once per session.
     if let Some(bootstrap) = node_bootstrap.as_ref() {
@@ -453,7 +453,7 @@ pub fn all_tools_with_runtime(
             ));
             tracing::debug!("[integrations] registered apify tools");
         } else {
-            tracing::debug!("[integrations] apify disabled â€?skipping");
+            tracing::debug!("[integrations] apify disabled ï¿½?skipping");
         }
         if root_config.integrations.google_places.is_active() {
             tools.push(Box::new(
@@ -464,7 +464,7 @@ pub fn all_tools_with_runtime(
             ));
             tracing::debug!("[integrations] registered google_places tools");
         } else {
-            tracing::debug!("[integrations] google_places disabled â€?skipping");
+            tracing::debug!("[integrations] google_places disabled ï¿½?skipping");
         }
         if root_config.integrations.parallel.is_active() {
             tools.push(Box::new(
@@ -487,7 +487,7 @@ pub fn all_tools_with_runtime(
             ));
             tracing::debug!("[integrations] registered parallel tools");
         } else {
-            tracing::debug!("[integrations] parallel disabled â€?skipping");
+            tracing::debug!("[integrations] parallel disabled ï¿½?skipping");
         }
         if root_config.integrations.tinyfish.is_active() {
             tools.push(Box::new(
@@ -501,7 +501,7 @@ pub fn all_tools_with_runtime(
             ));
             tracing::debug!("[integrations] registered tinyfish tools");
         } else {
-            tracing::debug!("[integrations] tinyfish disabled â€?skipping");
+            tracing::debug!("[integrations] tinyfish disabled ï¿½?skipping");
         }
         if root_config.integrations.stock_prices.is_active() {
             tools.push(Box::new(
@@ -521,7 +521,7 @@ pub fn all_tools_with_runtime(
             ));
             tracing::debug!("[integrations] registered stock_prices tools");
         } else {
-            tracing::debug!("[integrations] stock_prices disabled â€?skipping");
+            tracing::debug!("[integrations] stock_prices disabled ï¿½?skipping");
         }
         if root_config.integrations.twilio.is_active() {
             tools.push(Box::new(
@@ -529,10 +529,10 @@ pub fn all_tools_with_runtime(
             ));
             tracing::debug!("[integrations] registered twilio tools");
         } else {
-            tracing::debug!("[integrations] twilio disabled â€?skipping");
+            tracing::debug!("[integrations] twilio disabled ï¿½?skipping");
         }
 
-        // Composio â€?backend-proxied 1000+ OAuth integrations. Registers
+        // Composio ï¿½?backend-proxied 1000+ OAuth integrations. Registers
         // five agent tools (list_toolkits, list_connections, authorize,
         // list_tools, execute) when the composio toggle is on. See
         // `src/openhuman/composio/tools.rs` for per-tool details.
@@ -544,11 +544,11 @@ pub fn all_tools_with_runtime(
             );
             tools.extend(composio_tools);
         } else {
-            tracing::debug!("[integrations] composio disabled â€?skipping");
+            tracing::debug!("[integrations] composio disabled ï¿½?skipping");
         }
     } else {
         tracing::debug!(
-            "[integrations] build_client returned None â€?integration tools not registered"
+            "[integrations] build_client returned None ï¿½?integration tools not registered"
         );
     }
 
@@ -559,10 +559,10 @@ pub fn all_tools_with_runtime(
         )));
         tracing::debug!("[integrations] registered polymarket tool (read + trading)");
     } else {
-        tracing::debug!("[integrations] polymarket disabled â€?skipping");
+        tracing::debug!("[integrations] polymarket disabled ï¿½?skipping");
     }
 
-    // Feishu/Lark tools â€?register when LarkConfig is present and enabled.
+    // Feishu/Lark tools ï¿½?register when LarkConfig is present and enabled.
     if let Some(lark) = &root_config.channels_config.lark {
         if !lark.app_id.is_empty() && !lark.app_secret.is_empty() {
             let client = FeishuClient::new(lark.app_id.clone(), lark.app_secret.clone(), true);
@@ -575,14 +575,14 @@ pub fn all_tools_with_runtime(
             );
         } else {
             tracing::debug!(
-                "[integrations] feishu/lark config present but app_id or app_secret empty â€?skipping"
+                "[integrations] feishu/lark config present but app_id or app_secret empty ï¿½?skipping"
             );
         }
     } else {
-        tracing::debug!("[integrations] feishu/lark not configured â€?skipping");
+        tracing::debug!("[integrations] feishu/lark not configured ï¿½?skipping");
     }
 
-    // Coding-harness `lsp` tool (issue #1205) â€?capability-gated by the
+    // Coding-harness `lsp` tool (issue #1205) ï¿½?capability-gated by the
     // OPENHUMAN_LSP_ENABLED env var. The backend (real language-server
     // bridge) is a follow-up; today the gate just controls visibility
     // so agents don't see a method that always errors.
@@ -590,7 +590,7 @@ pub fn all_tools_with_runtime(
         tools.push(Box::new(
             crate::openhuman::tools::implementations::LspTool::new(),
         ));
-        tracing::debug!("[lsp] capability gate on â€?LspTool registered");
+        tracing::debug!("[lsp] capability gate on ï¿½?LspTool registered");
     } else {
         tracing::debug!("[lsp] capability gate off (set OPENHUMAN_LSP_ENABLED=1 to register)");
     }
