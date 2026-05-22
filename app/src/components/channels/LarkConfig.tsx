@@ -1,4 +1,3 @@
-import debug from 'debug';
 import { useCallback, useState } from 'react';
 import { AUTH_MODE_LABELS } from '../../lib/channels/definitions';
 import { useT } from '../../lib/i18n/I18nContext';
@@ -9,12 +8,10 @@ import {
   upsertChannelConnection,
 } from '../../store/channelConnectionsSlice';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import type { ChannelConnectionStatus, ChannelDefinition } from '../../types/channels';
+import type { ChannelAuthMode, ChannelConnectionStatus, ChannelDefinition } from '../../types/channels';
 import { restartCoreProcess } from '../../utils/tauriCommands/core';
 import ChannelFieldInput from './ChannelFieldInput';
 import ChannelStatusBadge from './ChannelStatusBadge';
-
-const log = debug('channels:lark');
 
 interface LarkConfigProps {
   definition: ChannelDefinition;
@@ -112,7 +109,7 @@ const LarkConfig = ({ definition }: LarkConfigProps) => {
   );
 
   const handleDisconnect = useCallback(
-    (authMode: string) => {
+    (authMode: ChannelAuthMode) => {
       const key = `lark:${authMode}`;
       void runBusy(key, async () => {
         await channelConnectionsApi.disconnectChannel('lark', authMode);
