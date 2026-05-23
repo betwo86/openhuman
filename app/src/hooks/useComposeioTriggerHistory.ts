@@ -61,13 +61,17 @@ export function useComposeioTriggerHistory(limit = 100): ComposeioTriggerHistory
       if (!sessionTokenRef.current || sessionTokenRef.current !== requestToken) {
         return;
       }
-      const result = response.result.result;
-      setArchiveDir(result.archive_dir);
-      setCurrentDayFile(result.current_day_file);
-      setEntries(result.entries);
+      const result = response.result?.result;
+      if (!result) {
+        clearHistory();
+        return;
+      }
+      setArchiveDir(result.archive_dir ?? null);
+      setCurrentDayFile(result.current_day_file ?? null);
+      setEntries(result.entries ?? []);
       setError(null);
       setCoreConnected(true);
-      log('loaded %d composio trigger entries', result.entries.length);
+      log('loaded %d composio trigger entries', result.entries?.length ?? 0);
     } catch (refreshError) {
       if (!sessionTokenRef.current || sessionTokenRef.current !== requestToken) {
         return;
