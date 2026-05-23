@@ -66,7 +66,7 @@ function normalizeChannelConnectionUpdatePayload(
   const lastError = obj.lastError ?? obj.last_error;
   const capabilities = obj.capabilities;
 
-  const isKnownChannel = channel === 'telegram' || channel === 'discord' || channel === 'web';
+  const isKnownChannel = channel === 'telegram' || channel === 'discord' || channel === 'web' || channel === 'lark' || channel === 'dingtalk';
   const isKnownAuthMode =
     authMode === 'managed_dm' ||
     authMode === 'oauth' ||

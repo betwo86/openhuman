@@ -12,7 +12,7 @@ interface ChannelSelectorProps {
   onSelectChannel: (channel: ChannelType) => void;
 }
 
-const CHANNEL_ICONS: Record<string, string> = { telegram: '✈️', discord: '🎮', web: '🌐' };
+const CHANNEL_ICONS: Record<string, string> = { telegram: '✈️', discord: '🎮', web: '🌐', lark: '🪶', dingtalk: '🔔' };
 const CHANNEL_STATUS_PRIORITY: ChannelConnectionStatus[] = [
   'connected',
   'connecting',

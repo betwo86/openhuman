@@ -51,6 +51,15 @@ function touchConnection(
   };
 }
 
+function ensureChannelModes(
+  state: ChannelConnectionsState,
+  channel: ChannelType
+): void {
+  if (!state.connections[channel]) {
+    state.connections[channel] = makeEmptyChannelModes();
+  }
+}
+
 const channelConnectionsSlice = createSlice({
   name: 'channelConnections',
   initialState,
@@ -60,11 +69,6 @@ const channelConnectionsSlice = createSlice({
       state.connections.telegram = makeEmptyChannelModes();
       state.connections.discord = makeEmptyChannelModes();
       state.connections.web = makeEmptyChannelModes();
-      // After #2048 widened ChannelType, redux-persist rehydrated states
-      // from before the channels existed wouldn't have these keys; without
-      // explicit initialisation here, the first `upsertChannelConnection`
-      // for either channel would crash on `state.connections[channel]`
-      // being undefined. Pin them by default so the migration is total.
       state.connections.lark = makeEmptyChannelModes();
       state.connections.dingtalk = makeEmptyChannelModes();
       state.defaultMessagingChannel = 'telegram';
@@ -85,6 +89,7 @@ const channelConnectionsSlice = createSlice({
       }>
     ) {
       const { channel, authMode, patch } = action.payload;
+      ensureChannelModes(state, channel);
       const existing = state.connections[channel][authMode];
       state.connections[channel][authMode] = touchConnection(existing, {
         channel,
@@ -103,6 +108,7 @@ const channelConnectionsSlice = createSlice({
       }>
     ) {
       const { channel, authMode, status, lastError } = action.payload;
+      ensureChannelModes(state, channel);
       const existing = state.connections[channel][authMode];
       state.connections[channel][authMode] = touchConnection(existing, {
         channel,
@@ -117,6 +123,7 @@ const channelConnectionsSlice = createSlice({
       action: PayloadAction<{ channel: ChannelType; authMode: ChannelAuthMode }>
     ) {
       const { channel, authMode } = action.payload;
+      ensureChannelModes(state, channel);
       state.connections[channel][authMode] = touchConnection(state.connections[channel][authMode], {
         channel,
         authMode,
