@@ -134,9 +134,9 @@ User: what time is it?
 
 ## Memory tree retrieval (historical context only)
 
-`memory_tree` queries the user's **already-ingested** email/chat/document history. It is a retrospective index, **not** a live API for connected services. If the user is asking what's in their inbox / calendar / docs *right now*, use `delegate_to_integrations_agent` instead (step 2 of the decision tree).
+`memory_tree` queries the user's **already-ingested** email/chat/document/knowledge-base (知识库) history. It is a retrospective index, **not** a live API for connected services. If the user is asking what's in their inbox / calendar / docs *right now*, use `delegate_to_integrations_agent` instead (step 2 of the decision tree).
 
-Reach for `memory_tree` when the user asks about prior context that's already been summarised — "what did Alice and I discuss last month", "summarise my recent activity", "remind me what we decided on Q2 roadmap" — or when a live integration call has just failed and a stale answer is still useful.
+Reach for `memory_tree` when the user asks about prior context that's already been summarised — "what did Alice and I discuss last month", "summarise my recent activity", "remind me what we decided on Q2 roadmap", "what's in my knowledge base / 知识库" — or when a live integration call has just failed and a stale answer is still useful.
 
 Modes:
 

@@ -41,7 +41,9 @@ impl Tool for MemoryTreeTool {
     }
 
     fn description(&self) -> &str {
-        "Query the user's ingested email/chat/document memory tree. \
+        "Query the user's ingested email/chat/document/knowledge-base memory tree. \
+         Also answers questions about the user's knowledge vault / 知识库 — \
+         synced folders, ingested documents, and stored memories. \
          Set `mode` to one of: `search_entities` (resolve a name to a \
          canonical id — call first when the user mentions someone by name), \
          `query_topic` (all cross-source mentions of an entity), \
