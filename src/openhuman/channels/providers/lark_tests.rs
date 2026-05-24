@@ -51,9 +51,9 @@ fn lark_user_allowed_wildcard() {
 }
 
 #[test]
-fn lark_user_denied_empty() {
+fn lark_user_allowed_when_empty_allowlist() {
     let ch = LarkChannel::new("id".into(), "secret".into(), "token".into(), None, vec![]);
-    assert!(!ch.is_user_allowed("ou_anyone"));
+    assert!(ch.is_user_allowed("ou_anyone"), "empty allowlist should allow all");
 }
 
 #[test]

@@ -162,6 +162,12 @@ impl LarkChannel {
         port: Option<u16>,
         allowed_users: Vec<String>,
     ) -> Self {
+        if allowed_users.is_empty() {
+            tracing::warn!(
+                "[lark] allowed_users is empty — ALL users will be allowed. \
+                 Set allowed_users to a comma-separated list of open_ids or [\"*\"] to allow all."
+            );
+        }
         Self {
             app_id,
             app_secret,
@@ -487,6 +493,9 @@ impl LarkChannel {
 
     /// Check if a user open_id is allowed
     fn is_user_allowed(&self, open_id: &str) -> bool {
+        if self.allowed_users.is_empty() {
+            return true;
+        }
         self.allowed_users.iter().any(|u| u == "*" || u == open_id)
     }
 

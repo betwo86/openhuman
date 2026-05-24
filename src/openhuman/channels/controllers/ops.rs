@@ -6,7 +6,9 @@ use serde_json::{json, Value};
 use crate::api::config::{app_env_from_env, effective_backend_api_url, is_staging_app_env};
 use crate::api::jwt::get_session_token;
 use crate::api::rest::BackendOAuthClient;
-use crate::openhuman::config::{Config, DiscordConfig, IMessageConfig, TelegramConfig};
+use crate::openhuman::config::{
+    Config, DiscordConfig, IMessageConfig, LarkConfig, LarkReceiveMode, TelegramConfig,
+};
 use crate::openhuman::credentials;
 use crate::rpc::RpcOutcome;
 
@@ -332,6 +334,82 @@ pub async fn connect_channel(
             mention_only,
             "[discord] connect_channel: wrote channels_config.discord; restart core for listener to load token"
         );
+    } else if channel_id == "lark" && auth_mode == ChannelAuthMode::ApiKey {
+        let app_id = creds_map
+            .get("app_id")
+            .and_then(|v| v.as_str())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .ok_or_else(|| "missing required app_id".to_string())?
+            .to_string();
+        let app_secret = creds_map
+            .get("app_secret")
+            .and_then(|v| v.as_str())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .ok_or_else(|| "missing required app_secret".to_string())?
+            .to_string();
+
+        let encrypt_key = creds_map
+            .get("encrypt_key")
+            .and_then(|v| v.as_str())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string());
+
+        let verification_token = creds_map
+            .get("verification_token")
+            .and_then(|v| v.as_str())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string());
+
+        let use_feishu = parse_optional_bool(creds_map.get("use_feishu")).unwrap_or(true);
+
+        let receive_mode = creds_map
+            .get("receive_mode")
+            .and_then(|v| v.as_str())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(|s| match s.to_ascii_lowercase().as_str() {
+                "webhook" => LarkReceiveMode::Webhook,
+                _ => LarkReceiveMode::Websocket,
+            })
+            .unwrap_or_default();
+
+        let port = creds_map
+            .get("port")
+            .and_then(|v| v.as_str())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .and_then(|s| s.parse::<u16>().ok());
+
+        let allowed_users = parse_allowed_users(creds_map.get("allowed_users"));
+        let allowed_users_count = allowed_users.len();
+
+        let mut persisted = config.clone();
+        persisted.channels_config.lark = Some(LarkConfig {
+            app_id,
+            app_secret,
+            encrypt_key,
+            verification_token,
+            allowed_users,
+            use_feishu,
+            receive_mode,
+            port,
+        });
+
+        persisted
+            .save()
+            .await
+            .map_err(|e| format!("failed to persist lark config.toml: {e}"))?;
+
+        tracing::info!(
+            target: "openhuman::channels",
+            use_feishu,
+            allowed_users_count,
+            "[lark] connect_channel: wrote channels_config.lark; restart core for listener to load"
+        );
     }
 
     Ok(RpcOutcome::single_log(
@@ -400,6 +478,18 @@ pub async fn disconnect_channel(
             tracing::info!(
                 target: "openhuman::channels",
                 "[imessage] disconnect_channel: cleared channels_config.imessage"
+            );
+        }
+    } else if channel_id == "lark" && auth_mode == ChannelAuthMode::ApiKey {
+        let mut persisted = config.clone();
+        if persisted.channels_config.lark.take().is_some() {
+            persisted
+                .save()
+                .await
+                .map_err(|e| format!("failed to clear lark config.toml: {e}"))?;
+            tracing::info!(
+                target: "openhuman::channels",
+                "[lark] disconnect_channel: cleared channels_config.lark"
             );
         }
     }

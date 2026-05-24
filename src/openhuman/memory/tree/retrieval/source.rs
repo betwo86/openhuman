@@ -23,7 +23,7 @@ use chrono::{Duration, Utc};
 use crate::openhuman::config::Config;
 use crate::openhuman::memory::tree::content_store::read as content_read;
 use crate::openhuman::memory::tree::retrieval::types::{
-    hit_from_summary, QueryResponse, RetrievalHit,
+    hit_from_summary, NodeKind, QueryResponse, RetrievalHit,
 };
 use crate::openhuman::memory::tree::score::embed::{build_embedder_from_config, cosine_similarity};
 use crate::openhuman::memory::tree::tree_source::store;
@@ -74,11 +74,48 @@ pub async fn query_source(
     .await
     .map_err(|e| anyhow::anyhow!("query_source join error: {e}"))??;
 
-    let filtered = if let Some(days) = time_window_days {
+    let mut filtered = if let Some(days) = time_window_days {
         filter_by_window(hits, days)
     } else {
         hits
     };
+
+    // When source_kind is "document" with no specific source_id, also search
+    // unified memory for vault (知识库) content. Vault documents are stored
+    // under namespaces "vault:<id>" and are not indexed in the memory tree.
+    if source_kind == Some(SourceKind::Document) && source_id.is_none() {
+        if let Some(client) = crate::openhuman::memory::global::client_if_ready() {
+            if let Ok(namespaces) = client.list_namespaces().await {
+                for ns in namespaces.iter().filter(|n| n.starts_with("vault:")) {
+                    let vault_content: Option<String> = if let Some(q) = query {
+                        client.query_namespace(ns, q, limit as u32).await.ok()
+                    } else {
+                        client.recall_namespace(ns, limit as u32).await.ok().flatten()
+                    };
+                    if let Some(content) = vault_content.filter(|c| !c.is_empty()) {
+                        let hit = RetrievalHit {
+                            node_id: format!("vault:{}", ns),
+                            node_kind: NodeKind::Summary,
+                            tree_id: String::new(),
+                            tree_kind: TreeKind::Source,
+                            tree_scope: ns.clone(),
+                            level: 1,
+                            content: format!("[Vault: {}]\n{}", ns, content),
+                            entities: vec![],
+                            topics: vec![],
+                            time_range_start: Utc::now() - Duration::days(365),
+                            time_range_end: Utc::now(),
+                            score: 0.0,
+                            child_ids: vec![],
+                            source_ref: None,
+                        };
+                        filtered.push(hit);
+                    }
+                }
+            }
+        }
+    }
+
     let total = filtered.len();
 
     let sorted = if let Some(q) = query {
@@ -273,6 +310,7 @@ const PLATFORM_KINDS: &[(&str, &str)] = &[
     ("dropbox", "document"),
     ("onedrive", "document"),
     ("confluence", "document"),
+    ("vault", "document"),
 ];
 
 /// Decide whether a tree's `scope` falls under `kind_prefix`. Scope is the
