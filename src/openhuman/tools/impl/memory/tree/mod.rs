@@ -42,8 +42,10 @@ impl Tool for MemoryTreeTool {
 
     fn description(&self) -> &str {
         "Query the user's ingested email/chat/document/knowledge-base memory tree. \
-         Also answers questions about the user's knowledge vault / 知识库 — \
-         synced folders, ingested documents, and stored memories. \
+         When the user asks about their 知识库 (knowledge vault / knowledge base) — \
+         e.g. \"我的知识库里有什么\", \"帮我查一下知识库\", \"知识库里有关于X的内容吗\" — \
+         use this tool directly with source_kind \"document\". \
+         知识库 is NOT an external service, it is accessed through this tool. \
          Set `mode` to one of: `search_entities` (resolve a name to a \
          canonical id — call first when the user mentions someone by name), \
          `query_topic` (all cross-source mentions of an entity), \
